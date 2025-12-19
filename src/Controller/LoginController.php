@@ -17,6 +17,7 @@ final class LoginController extends AbstractController
     public function index(Request $request,UserRepository $userRepository, UserPasswordHasherInterface $passwordHasher): Response
     {
         $user = new User();
+        $session = $request->getSession();
 
         $form = $this->createForm(LoginType::class, $user);
         $form->handleRequest($request);
@@ -29,7 +30,7 @@ final class LoginController extends AbstractController
             $userDB = $userRepository->findOneBy(['username' => $username]);
 
             if ($passwordHasher->isPasswordValid($userDB, $password)) {
-                $_SESSION['UserID'] = $userDB->getId();
+                $session->set('UserID', $userDB->getId());
                 return $this->redirectToRoute('app_home_page');
             }
         }

@@ -44,8 +44,41 @@
         <h1>Hello {{ Username }}! </h1>
         <p>{% for Role in Roles %}{{ Role }}{% endfor %}</p>
 
+        <div id="emailDisplay">
+            {% if hasEmail %}
+                <p>Your email is: {{ email }}</p>
+            {% else %}
+                <form id="emailForm" method="post" action="{{ path('app_home_page') }}">
+                    <input id="emailInput" type="email" name="email" required>
+                    <button type="submit">Add</button>
+                </form>
+            {% endif %}
+        </div>
+
     </section>
 
 
+    <script>
+        const form = document.getElementById('emailForm');
 
+        if (form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const input = document.getElementById('emailInput');
+            const email = input.value;
+
+            const res = await fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form),
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                credentials: 'include'
+            });
+
+            if (res.ok) {
+                document.getElementById('emailDisplay').innerHTML =
+                    `<p>Your email is: ${email}</p>`;
+            }
+        });}
+    </script>
 {% endblock %}
