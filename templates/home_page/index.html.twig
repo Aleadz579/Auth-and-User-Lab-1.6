@@ -4,7 +4,7 @@
 {% block stylesheets %}
     {{ parent() }}
     <style>
-        .home-card{
+        .info-card{
             max-width: 760px;
             margin: 24px auto 0;
             padding: 22px;
@@ -13,28 +13,39 @@
             border: 1px solid rgba(255,255,255,.12);
         }
 
-        .home-card h1{
+        .info-card h1{
             margin: 0 0 8px;
             font-size: clamp(1.6rem, 2.5vw, 2.2rem);
         }
 
-        .home-card p{
+        .info-card p{
             margin: 0 0 16px;
             color: rgba(255,255,255,.66);
         }
 
-        .home-card .meta{
+        .info-card .meta{
             font-size: .95rem;
             color: rgba(255,255,255,.66);
+        }
+        .LogOutBtn{
+
         }
     </style>
 {% endblock %}
 {% block body %}
 
-    <section class="home-card">
-        <h1>Alexander </h1>
-        <p>PHP / Symfony developer. I can build clean, practical web apps and backend features.</p>
-        <div class="meta">NRW, Germany · Open to opportunities</div>
+    <header class="topbar">
+        <button class="LogOutBtn">Logout</button>
+    </header>
+
+
+
+    <section class="info-card">
+        <h1>Hello {{ Username }}! </h1>
+        <p>{% for Role in Roles %}{{ Role }}{% endfor %}</p>
+
     </section>
+
+
 
 {% endblock %}

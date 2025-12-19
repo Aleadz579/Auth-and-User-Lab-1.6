@@ -1,0 +1,45 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <style>
+        .auth-wrapper {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+        }
+        .auth-card {
+            width: 100%;
+            max-width: 380px;
+            padding: 32px;
+            background: #191d25;
+            border-radius: 10px;
+            box-shadow: 0 20px 40px rgba(0,0,0,.1);
+        }
+
+        .auth-card h1 {
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .auth-card label {
+            font-weight: 600;
+        }
+
+        .auth-card input {
+            width: 100%;
+            padding: 10px 12px;
+            margin-top: 6px;
+            margin-bottom: 16px;
+            border: 1px solid #ccd2da;
+            border-radius: 6px;
+        }
+    </style>
+
+    <div class="auth-wrapper">
+        <div class="auth-card">
+            was
+        </div>
+    </div>
+{% endblock %}

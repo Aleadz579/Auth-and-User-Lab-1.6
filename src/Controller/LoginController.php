@@ -9,11 +9,12 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 final class LoginController extends AbstractController
 {
     #[Route('/login', name: 'app_login')]
-    public function index(Request $request,UserRepository $userRepository): Response
+    public function index(Request $request,UserRepository $userRepository, UserPasswordHasherInterface $passwordHasher): Response
     {
         $user = new User();
 
@@ -27,17 +28,23 @@ final class LoginController extends AbstractController
 
             $userDB = $userRepository->findOneBy(['username' => $username]);
 
-            if($userDB && $password === $userDB->getPassword()) {
+            if ($passwordHasher->isPasswordValid($userDB, $password)) {
+                $_SESSION['UserID'] = $userDB->getId();
                 return $this->redirectToRoute('app_home_page');
-
             }
-
-
         }
 
         return $this->render('login/index.html.twig', [
             'controller_name' => 'LoginController',
             'Login' => $form,
+        ]);
+    }
+
+    #[Route('login/reset', name: 'password_reset')]
+    public function PassReset(Request $request,UserRepository $userRepository, UserPasswordHasherInterface $passwordHasher,)
+    {
+        return $this->render('login/PassReset.html.twig', [
+
         ]);
     }
 }

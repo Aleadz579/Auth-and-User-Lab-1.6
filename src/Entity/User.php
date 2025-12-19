@@ -25,6 +25,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private array $roles = [];
 
     /**
+     * @var string
+     */
+    #[ORM\Column(length: 25)]
+    private ?string $email = null;
+
+    /**
      * @var string The hashed password
      */
     #[ORM\Column]
@@ -79,6 +85,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    public function getEmail(): ?string
+    {
+        return $this->email;
+    }
+
+    public function setEmail(string $email): static
+    {
+        $this->email = $email;
+
+        return $this;
+    }
     /**
      * @see PasswordAuthenticatedUserInterface
      */
