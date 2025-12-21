@@ -39,34 +39,33 @@
 
     <main class="auth-wrapper">
         <div class="container auth-card">
-
             <section class="card auth__card">
                 <header class="auth__header">
                     <h1>Password reset</h1>
-                    <p class="muted">Enter your email and we’ll send you a reset link.</p>
                 </header>
-
-                <form id="emailInput" class="auth__form" method="post">
-                    <div class="field">
-                        <label class="label" for="email">Email</label>
-                        <input class="input" id="email" name="email" type="email" autocomplete="email" required>
-                        <small id="EmailHint" class="hint muted">If an account exists, you’ll receive an email.</small>
-                        <span id="SentHint" style="display:none;">Email sent!</span>
-                        <span id="ExistHint" style="display:none;">This Email isn't connected to any Account!</span>
+                <form id="NewPass" class="auth__form" method="post">
+                    <div class="NewPassInput">
+                        <label class="label" for="Pass1">New Password</label>
+                        <input class="input" id="Pass1" name="Pass1" required>
                     </div>
 
+                    <div class="NewPassInputConfirm">
+                        <label class="label" for="Pass2">Confirm Password</label>
+                        <input class="input" id="Pass2" name="Pass2" required>
+                    </div>
+                    <span id="SamePass" style="display:none;">Passwords must be identical!</span>
+                    <span id="PassChanged" style="display:none;">Password successfully changed!</span>
                     <div class="actions">
-                        <button class="btn btn--primary" type="submit">Send reset link</button>
+                        <button class="btn btn--primary" type="submit">Reset Password</button>
                         <a class="link muted" href="/login">Back to login</a>
                     </div>
                 </form>
             </section>
-
         </div>
     </main>
 
     <script>
-        const form = document.getElementById('emailInput');
+        const form = document.getElementById('NewPass');
 
         if (form) {
             form.addEventListener('submit', async (e) => {
@@ -79,19 +78,23 @@
                     credentials: 'include'
                 });
 
-                const input = document.getElementById('emailInput');
-                const email = input.value;
+                const input1 = document.getElementById('Pass1');
+                const input2 = document.getElementById('Pass2');
+                const Pass1 = input1.value;
+                const Pass2 = input2.value;
 
-                const data = await res.json();
-
-                if (data.emailSent) {
-                    document.getElementById('SentHint').style.display = 'inline';
-                    document.getElementById('EmailHint').style.display = 'none';
-                } else
+                if(Pass1 === Pass2)
                 {
-                    document.getElementById('ExistHint').style.display = 'inline';
-                    document.getElementById('EmailHint').style.display = 'none';
+                    const data = await res.json();
+
+                    if (data.PasswordChanged) {
+                        document.getElementById('PassChanged').style.display = 'inline';
+                    }
+                }else
+                {
+                    document.getElementById('SamePass').style.display = 'inline';
                 }
+
             });}
     </script>
 {% endblock %}

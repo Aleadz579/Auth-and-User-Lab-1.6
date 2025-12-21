@@ -35,7 +35,9 @@
 {% block body %}
 
     <header class="topbar">
-        <button class="LogOutBtn">Logout</button>
+        <button type="button" onclick="window.location.href='{{ path('app_logout') }}'">
+            Logout
+        </button>
     </header>
 
 
@@ -53,6 +55,7 @@
                     <button type="submit">Add</button>
                 </form>
             {% endif %}
+            <span id="emailTaken">Email is taken</span>
         </div>
 
     </section>
@@ -75,9 +78,15 @@
                 credentials: 'include'
             });
 
-            if (res.ok) {
+            const data = await res.json();
+
+            if (data.emailAdded) {
                 document.getElementById('emailDisplay').innerHTML =
                     `<p>Your email is: ${email}</p>`;
+            } else if(data.emailExists)
+            {
+                document.getElementById('emailTaken').style.display = 'inline';
+
             }
         });}
     </script>

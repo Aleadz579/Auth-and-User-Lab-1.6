@@ -35,9 +35,8 @@ final class RegisterController extends AbstractController
                 return $this->redirectToRoute('app_register');
             }
 
-            $hashed = $passwordHasher->hashPassword($user, $password);
-
             $userDB = $userRepository->findOneBy(['username' => $username]);
+            $hashed = $passwordHasher->hashPassword($userDB, $password);
 
             if(!$userDB) {
                 $user->setUsername($username);
