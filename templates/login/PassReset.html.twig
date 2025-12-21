@@ -37,9 +37,53 @@
         }
     </style>
 
-    <div class="auth-wrapper">
-        <div class="auth-card">
-            was
+    <main class="auth">
+        <div class="container auth__container">
+
+            <section class="card auth__card">
+                <header class="auth__header">
+                    <h1>Password reset</h1>
+                    <p class="muted">Enter your email and we’ll send you a reset link.</p>
+                </header>
+
+                <form id="emailInput" class="auth__form" method="post">
+                    <div class="field">
+                        <label class="label" for="email">Email</label>
+                        <input class="input" id="email" name="email" type="email" autocomplete="email" required>
+                        <small id="EmailHint" class="hint muted">If an account exists, you’ll receive an email.</small>
+                        <span id="SentHint" style="display:none;">Email sent!</span>
+                    </div>
+
+                    <div class="actions">
+                        <button class="btn btn--primary" type="submit">Send reset link</button>
+                        <a class="link muted" href="/login">Back to login</a>
+                    </div>
+                </form>
+            </section>
+
         </div>
-    </div>
+    </main>
+
+    <script>
+        const form = document.getElementById('emailInput');
+
+        if (form) {
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const res = await fetch(form.action, {
+                    method: 'POST',
+                    body: new FormData(form),
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    credentials: 'include'
+                });
+
+                const data = await res.json();
+
+                if (data.emailSent) {
+                    document.getElementById('SentHint').style.display = 'inline';
+                    document.getElementById('EmailHint').style.display = 'none';
+                }
+            });}
+    </script>
 {% endblock %}

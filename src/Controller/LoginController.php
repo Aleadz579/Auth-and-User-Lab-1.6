@@ -9,7 +9,10 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
 
 final class LoginController extends AbstractController
 {
@@ -42,10 +45,27 @@ final class LoginController extends AbstractController
     }
 
     #[Route('login/reset', name: 'password_reset')]
-    public function PassReset(Request $request,UserRepository $userRepository, UserPasswordHasherInterface $passwordHasher,)
+    public function PassReset(MailerInterface $mailer, Request $request): Response
     {
-        return $this->render('login/PassReset.html.twig', [
+        $emailSent = false;
+        try{
+            if ($request->isXmlHttpRequest() && $request->isMethod('POST')) {
+                $email = (new Email())
+                    ->from('leadzauthlab@gmail.com')
+                    ->to('engelhardtcarsten00@gmail.com')
+                    ->subject('Bastard')
+                    ->text('Hund.');
+                $mailer->send($email);
+                $emailSent = true;
+                return new JsonResponse(['emailSent' => $emailSent]);
+            }
+        } catch (\Throwable $e) {
+            return new Response($e->getMessage(), 500);
+        }
 
+
+        return $this->render('login/PassReset.html.twig', [
+            'emailSent' => $emailSent,
         ]);
     }
 }

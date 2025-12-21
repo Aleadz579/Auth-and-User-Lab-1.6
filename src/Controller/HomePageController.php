@@ -20,21 +20,13 @@ final class HomePageController extends AbstractController
         $SessionUsername = $userData->getUsername();
         $SessionRole = $userData->getRoles();
 
-
-
-
-
         if ($request->isXmlHttpRequest() && $request->isMethod('POST')) {
             $email = (string) $request->request->get('email');
 
             if ($userData->getEmail() == null && $userData->getEmail() == '') {
                 $userData->setEmail($email);
-                $hasEmail = true;
+
                 $em->flush();
-
-            }
-            else {
-
             }
             return new Response('ok');
         }
