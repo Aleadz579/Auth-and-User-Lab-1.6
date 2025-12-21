@@ -36,9 +36,10 @@ final class RegisterController extends AbstractController
             }
 
             $userDB = $userRepository->findOneBy(['username' => $username]);
-            $hashed = $passwordHasher->hashPassword($userDB, $password);
+            $hashed = $passwordHasher->hashPassword($user, $password);
 
             if(!$userDB) {
+
                 $user->setUsername($username);
                 $user->setPassword($hashed);
 
