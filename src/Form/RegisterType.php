@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Entity\User;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -13,7 +14,7 @@ class RegisterType extends AbstractType
     {
         $builder
             ->add('username')
-            ->add('password')
+            ->add('plainPassword', RepeatedType::class, ['mapped' => false,])
         ;
     }
 

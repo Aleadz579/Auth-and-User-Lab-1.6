@@ -16,6 +16,14 @@ security:
             # Ensure dev tools and static assets are always allowed
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
+            remember_me:
+                secret: '%kernel.secret%'
+                lifetime: 1209600
+                path: /
+                name: REMEMBERME
+                secure: auto
+                httponly: true
+                samesite: lax
         main:
             lazy: true
             provider: app_user_provider

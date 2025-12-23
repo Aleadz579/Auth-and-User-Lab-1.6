@@ -81,20 +81,19 @@
         <div class="auth-card">
             <h1>Login</h1>
             {{ form_start(Login) }}
-            {{ form_row(Login.username) }} <!--No remembering old data yet, maybe at the end using password manager-->
+            {{ form_row(Login.username) }} <!--I will not add prefilling the username.-->
             {{ form_row(Login.password) }}
             <label class="remember-me">
                 <input type="checkbox" name="_remember_me" value="on">
                 Remember me
             </label>
             <button class="authbtn" type="submit">Login</button>
-            {% if error %}
                 <div class="alert alert-danger" style="color: red">
-                    {{ error.messageKey|trans(error.messageData, 'security') }}
                     <a style="color: white"href="{{ path('password_reset') }}">Forgot password?</a>
+                    {% if error %}
+                    {{ error.messageKey|trans(error.messageData, 'security') }}
+                    {% endif %}
                 </div>
-
-            {% endif %}
             {{ form_end(Login) }}
         </div>
     </div>

@@ -26,16 +26,16 @@ final class RegisterController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $user = $form->getData();
             $username = $user->getUsername();
-            $password = $user->getPassword();
+            $plainPassword = $form->get('plainPassword')->getData();
 
-            $result = $passStrCheck->check($password);
+            $result = $passStrCheck->check($plainPassword);
             if (!$result['valid']) {
                 $this->addFlash('error', 'Password too weak.');
                 return $this->redirectToRoute('app_register');
             }
 
             $userDB = $userRepository->findOneBy(['username' => $username]);
-            $hashed = $passwordHasher->hashPassword($user, $password);
+            $hashed = $passwordHasher->hashPassword($user, $plainPassword);
 
             if(!$userDB) {
 
@@ -45,7 +45,7 @@ final class RegisterController extends AbstractController
                 $em->persist($user);
                 $em->flush();
 
-                $user->setIsActive = true;
+                $user->setIsActive(true);
 
                 return $this->redirectToRoute('app_login');
 

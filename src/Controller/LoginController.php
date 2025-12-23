@@ -93,12 +93,4 @@ final class LoginController extends AbstractController
             'email' => $userEmail,
         ]);
     }
-
-    #[Route('/logout', name: 'app_logout')]
-    public function logout(Request $request): void
-    {
-        $session = $request->getSession();
-        $session->invalidate();
-    }
-
 }
