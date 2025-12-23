@@ -3,7 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\User;
-use App\Form\LoginType;
+use App\Form\RegisterType;
 use App\Repository\UserRepository;
 use App\Service\PassStrCheck;
 use Doctrine\ORM\EntityManagerInterface;
@@ -18,10 +18,9 @@ final class RegisterController extends AbstractController
     #[Route('/register', name: 'app_register')]
     public function index(Request $request, UserRepository $userRepository, EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher, PassStrCheck $passStrCheck): Response
     {
-        $isWeak = false;
         $user = new User();
 
-        $form = $this->createForm(LoginType::class, $user);
+        $form = $this->createForm(RegisterType::class, $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

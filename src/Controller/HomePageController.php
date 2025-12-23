@@ -14,17 +14,16 @@ final class HomePageController extends AbstractController
     #[Route('/homepage', name: 'app_home_page', methods: ['GET','POST'])]
     public function index(UserRepository $userRepository, Request $request, EntityManagerInterface $em): Response
     {
-        if (!$request->getSession()->get('UserID')) {
-            return $this->redirectToRoute('app_login');
-        }
+        $this->denyAccessUnlessGranted('ROLE_USER');
 
         $emailAdded = false;
         $emailExists = false;
-        $id = $request->getSession()->get('UserID');
         $hasEmail = false;
-        $userData = $userRepository->findOneBy(['id' => $id]);
+        $userData = $this->getUser();
         $SessionUsername = $userData->getUsername();
         $SessionRole = $userData->getRoles();
+
+        assert($userData instanceof \App\Entity\User);
 
         if ($request->isXmlHttpRequest() && $request->isMethod('POST')) {
             $email = (string) $request->request->get('email');

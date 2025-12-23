@@ -9,16 +9,27 @@ security:
         app_user_provider:
             entity:
                 class: App\Entity\User
-                property: email
+                property: username
 
     firewalls:
         dev:
             # Ensure dev tools and static assets are always allowed
-            pattern: ^/(_profiler|_wdt|assets|build)/
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
         main:
             lazy: true
             provider: app_user_provider
+            form_login:
+                login_path: app_login
+                check_path: app_login
+                default_target_path: app_home_page
+
+                username_parameter: login[username]
+                password_parameter: login[password]
+
+                enable_csrf: true
+                csrf_parameter: login[_token]
+                csrf_token_id: authenticate
             logout:
                 path: app_logout
                 target: app_login
@@ -32,7 +43,10 @@ security:
 
     # Note: Only the *first* matching rule is applied
     access_control:
-
+        - { path: ^/login, roles: PUBLIC_ACCESS }
+        - { path: ^/register, roles: PUBLIC_ACCESS }
+        - { path: ^/admin, roles: ROLE_ADMIN }
+        - { path: ^/, roles: ROLE_USER }
         # - { path: ^/profile, roles: ROLE_USER }
 
 when@test:

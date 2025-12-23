@@ -15,34 +15,19 @@ use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Doctrine\ORM\EntityManagerInterface;
-
+use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 final class LoginController extends AbstractController
 {
     #[Route('/login', name: 'app_login')]
-    public function index(Request $request, UserRepository $userRepository, UserPasswordHasherInterface $passwordHasher): Response
+    public function index(AuthenticationUtils $authenticationUtils): Response
     {
         $user = new User();
-        $session = $request->getSession();
-
         $form = $this->createForm(LoginType::class, $user);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $user = $form->getData();
-            $username = $user->getUsername();
-            $password = $user->getPassword();
-
-            $userDB = $userRepository->findOneBy(['username' => $username]);
-
-            if ($passwordHasher->isPasswordValid($userDB, $password)) {
-                $session->set('UserID', $userDB->getId());
-                return $this->redirectToRoute('app_home_page');
-            }
-        }
 
         return $this->render('login/index.html.twig', [
-            'controller_name' => 'LoginController',
-            'Login' => $form,
+            'Login' => $form->createView(),
+            'last_username' => $authenticationUtils->getLastUsername(),
+            'error' => $authenticationUtils->getLastAuthenticationError(),
         ]);
     }
 
