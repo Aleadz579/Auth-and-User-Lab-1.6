@@ -53,16 +53,48 @@
     .authbtn:hover {
         background: #4338ca;
     }
+
+    .remember-me{
+        display:flex;
+        align-items:center;
+        gap:10px;
+        margin: -4px 0 16px;
+        font-weight:600;
+        color: rgba(255,255,255,.85);
+        cursor:pointer;
+        user-select:none;
+    }
+
+    .remember-me input[type="checkbox"]{
+        width:18px;
+        height:18px;
+        margin:0;
+        padding:0;
+        border-radius:5px;
+        border:1px solid rgba(255,255,255,.22);
+        background: rgba(255,255,255,.06);
+        accent-color:#4f46e5;
+    }
 </style>
 
     <div class="auth-wrapper">
         <div class="auth-card">
             <h1>Login</h1>
             {{ form_start(Login) }}
-            {{ form_row(Login.username) }}
+            {{ form_row(Login.username) }} <!--No remembering old data yet, maybe at the end using password manager-->
             {{ form_row(Login.password) }}
+            <label class="remember-me">
+                <input type="checkbox" name="_remember_me" value="on">
+                Remember me
+            </label>
             <button class="authbtn" type="submit">Login</button>
-            <a href="{{ path('password_reset') }}">Forgot password?</a>
+            {% if error %}
+                <div class="alert alert-danger" style="color: red">
+                    {{ error.messageKey|trans(error.messageData, 'security') }}
+                    <a style="color: white"href="{{ path('password_reset') }}">Forgot password?</a>
+                </div>
+
+            {% endif %}
             {{ form_end(Login) }}
         </div>
     </div>

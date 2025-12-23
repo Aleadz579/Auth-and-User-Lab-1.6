@@ -24,6 +24,10 @@ final class LoginController extends AbstractController
         $user = new User();
         $form = $this->createForm(LoginType::class, $user);
 
+        if ($this->getUser()) {
+            return $this->redirectToRoute('app_home_page');
+        }
+
         return $this->render('login/index.html.twig', [
             'Login' => $form->createView(),
             'last_username' => $authenticationUtils->getLastUsername(),

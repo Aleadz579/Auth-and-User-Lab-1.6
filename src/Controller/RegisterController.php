@@ -45,6 +45,8 @@ final class RegisterController extends AbstractController
                 $em->persist($user);
                 $em->flush();
 
+                $user->setIsActive = true;
+
                 return $this->redirectToRoute('app_login');
 
             } else {
