@@ -81,7 +81,7 @@
         <div class="auth-card">
             <h1>Login</h1>
             {{ form_start(Login) }}
-            {{ form_row(Login.username) }} <!--I will not add prefilling the username.-->
+            {{ form_row(Login.username, { attr: { value: last_username, autocomplete: 'username' } }) }} <!--Fine there you have it-->
             {{ form_row(Login.password) }}
             <label class="remember-me">
                 <input type="checkbox" name="_remember_me" value="on">

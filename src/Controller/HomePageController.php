@@ -16,8 +16,6 @@ final class HomePageController extends AbstractController
     #[Route('/homepage', name: 'app_home_page', methods: ['GET','POST'])]
     public function index(UserRepository $userRepository, Request $request, EntityManagerInterface $em): Response
     {
-        $this->denyAccessUnlessGranted('ROLE_USER');
-
         $emailAdded = false;
         $emailExists = false;
         $hasEmail = false;
