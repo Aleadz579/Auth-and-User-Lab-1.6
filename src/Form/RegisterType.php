@@ -17,8 +17,11 @@ class RegisterType extends AbstractType
             ->add('username')
             ->add('plainPassword',  RepeatedType::class, [
                 'mapped' => false,
-                'type' => PasswordType::class,])
-        ;
+                'type' => PasswordType::class,
+                'invalid_message' => 'Passwords must match.',
+                'first_options'  => ['label' => 'Password'],
+                'second_options' => ['label' => 'Repeat Password'],
+                ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

@@ -32,8 +32,8 @@ security:
                 csrf_parameter: login[_token]
                 csrf_token_id: authenticate
             logout:
-                path: app_logout
-                target: app_login
+                path: /logout
+                target: /login
                 invalidate_session: true
             remember_me:
                 secret: '%kernel.secret%'

@@ -1,4 +1,4 @@
-{% extends 'base.html.twig' %}
+{% extends '/base.html.twig' %}
 
 {% block body %}
     <style>
@@ -39,33 +39,34 @@
 
     <main class="auth-wrapper">
         <div class="container auth-card">
+
             <section class="card auth__card">
                 <header class="auth__header">
                     <h1>Password reset</h1>
+                    <p class="muted">Enter your email and we’ll send you a reset link.</p>
                 </header>
-                <form id="NewPass" class="auth__form" method="post">
-                    <div class="NewPassInput">
-                        <label class="label" for="Pass1">New Password</label>
-                        <input class="input" id="Pass1" name="Pass1" required>
+
+                <form id="emailForm" class="auth__form" method="post">
+                    <div class="field">
+                        <label class="label" for="email">Email</label>
+                        <input class="input" id="emailInput" name="email" type="email" autocomplete="email" required>
+                        <small id="EmailHint" class="hint muted">If an account exists, you’ll receive an email.</small>
+                        <span id="SentHint" style="display:none; color: greenyellow">Email sent!</span>
+                        <span id="ExistHint" style="display:none; color: red">This Email isn't connected to any Account!</span>
                     </div>
 
-                    <div class="NewPassInputConfirm">
-                        <label class="label" for="Pass2">Confirm Password</label>
-                        <input class="input" id="Pass2" name="Pass2" required>
-                    </div>
-                    <span id="SamePass" style="display:none;">Passwords must be identical!</span>
-                    <span id="PassChanged" style="display:none;">Password successfully changed!</span>
                     <div class="actions">
-                        <button class="btn btn--primary" type="submit">Reset Password</button>
+                        <button class="btn btn--primary" type="submit">Send reset link</button>
                         <a class="link muted" href="/login">Back to login</a>
                     </div>
                 </form>
             </section>
+
         </div>
     </main>
 
     <script>
-        const form = document.getElementById('NewPass');
+        const form = document.getElementById('emailForm');
 
         if (form) {
             form.addEventListener('submit', async (e) => {
@@ -78,23 +79,21 @@
                     credentials: 'include'
                 });
 
-                const input1 = document.getElementById('Pass1');
-                const input2 = document.getElementById('Pass2');
-                const Pass1 = input1.value;
-                const Pass2 = input2.value;
+                const input = document.getElementById('emailInput');
+                const email = input.value;
 
-                if(Pass1 === Pass2)
-                {
-                    const data = await res.json();
+                const data = await res.json();
 
-                    if (data.PasswordChanged) {
-                        document.getElementById('PassChanged').style.display = 'inline';
-                    }
-                }else
+                if (data.result.isSent) {
+                    document.getElementById('SentHint').style.display = 'inline';
+                    document.getElementById('EmailHint').style.display = 'none';
+                    document.getElementById('ExistHint').style.display = 'none';
+                } else
                 {
-                    document.getElementById('SamePass').style.display = 'inline';
+                    document.getElementById('ExistHint').style.display = 'inline';
+                    document.getElementById('EmailHint').style.display = 'none';
+                    document.getElementById('SentHint').style.display = 'none';
                 }
-
             });}
     </script>
 {% endblock %}

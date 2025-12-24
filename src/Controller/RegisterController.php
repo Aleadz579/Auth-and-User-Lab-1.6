@@ -2,21 +2,18 @@
 
 namespace App\Controller;
 
+use App\Service\RegisterUser;
 use App\Entity\User;
 use App\Form\RegisterType;
-use App\Repository\UserRepository;
-use App\Service\PassStrCheck;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 final class RegisterController extends AbstractController
 {
     #[Route('/register', name: 'app_register')]
-    public function index(Request $request, UserRepository $userRepository, EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher, PassStrCheck $passStrCheck): Response
+    public function index(RegisterUser $registerUserService, Request $request): Response
     {
         $user = new User();
 
@@ -24,35 +21,16 @@ final class RegisterController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $user = $form->getData();
             $username = $user->getUsername();
             $plainPassword = $form->get('plainPassword')->getData();
 
-            $result = $passStrCheck->check($plainPassword);
-            if (!$result['valid']) {
-                $this->addFlash('error', 'Password too weak.');
-                return $this->redirectToRoute('app_register');
-            }
+            $result = $registerUserService->register($username, $plainPassword);
 
-            $userDB = $userRepository->findOneBy(['username' => $username]);
-            $hashed = $passwordHasher->hashPassword($user, $plainPassword);
-
-            if(!$userDB) {
-
-                $user->setUsername($username);
-                $user->setPassword($hashed);
-
-                $em->persist($user);
-                $em->flush();
-
-                $user->setIsActive(true);
-
-                return $this->redirectToRoute('app_login');
-
-            } else {
+            if (!$result->success) {
                 $this->addFlash('error', 'Username already exists.');
                 return $this->redirectToRoute('app_register');
             }
+            return $this->redirectToRoute('app_login');
         }
         return $this->render('register/index.html.twig', [
             'controller_name' => 'RegisterController',

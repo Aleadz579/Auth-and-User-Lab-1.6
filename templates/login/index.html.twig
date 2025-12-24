@@ -88,12 +88,15 @@
                 Remember me
             </label>
             <button class="authbtn" type="submit">Login</button>
-                <div class="alert alert-danger" style="color: red">
-                    <a style="color: white"href="{{ path('password_reset') }}">Forgot password?</a>
-                    {% if error %}
-                    {{ error.messageKey|trans(error.messageData, 'security') }}
-                    {% endif %}
-                </div>
+            <div style="display:flex; white-space:nowrap;">
+                <a style="color: white" href="{{ path('password_reset') }}">Forgot password?</a>&nbsp;
+                {% if error %}
+                    <div class="alert alert-danger" style="color: red">
+
+                        {{ error.messageKey|trans(error.messageData, 'security') }}
+                    </div>
+                {% endif %}
+            </div>
             {{ form_end(Login) }}
         </div>
     </div>

@@ -35,9 +35,9 @@
 {% block body %}
 
     <header class="topbar">
-        <button type="button" onclick="window.location.href='{{ path('app_logout') }}'">
-            Logout
-        </button>
+        <form method="post" action="/logout">
+            <button type="submit">Logout</button>
+        </form>
     </header>
 
 
