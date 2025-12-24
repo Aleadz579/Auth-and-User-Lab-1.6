@@ -66,34 +66,29 @@
     </main>
 
     <script>
-        const form = document.getElementById('emailForm');
+        (() => {
+            const emailForm = document.getElementById('emailForm');
+            if (!emailForm || emailForm.dataset.bound) return;
+            emailForm.dataset.bound = "1";
 
-        if (form) {
-            form.addEventListener('submit', async (e) => {
+            emailForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
 
-                const res = await fetch(form.action, {
+                const res = await fetch(emailForm.action, {
                     method: 'POST',
-                    body: new FormData(form),
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    body: new FormData(emailForm),
+                    headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
                     credentials: 'include'
                 });
 
-                const input = document.getElementById('emailInput');
-                const email = input.value;
-
                 const data = await res.json();
+                const sent = !!data.result?.isSent;
 
-                if (data.result.isSent) {
-                    document.getElementById('SentHint').style.display = 'inline';
-                    document.getElementById('EmailHint').style.display = 'none';
-                    document.getElementById('ExistHint').style.display = 'none';
-                } else
-                {
-                    document.getElementById('ExistHint').style.display = 'inline';
-                    document.getElementById('EmailHint').style.display = 'none';
-                    document.getElementById('SentHint').style.display = 'none';
-                }
-            });}
+                document.getElementById('EmailHint').style.display = 'none';
+                document.getElementById('SentHint').style.display = sent ? 'inline' : 'none';
+                document.getElementById('ExistHint').style.display = sent ? 'none' : 'inline';
+            });
+        })();
     </script>
+
 {% endblock %}

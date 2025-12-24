@@ -12,15 +12,18 @@ use App\Service\NewPassword;
 
 final class PassResetController extends AbstractController
 {
-    #[Route('login/reset', name: 'password_reset')]
+    #[Route('/login/reset', name: 'password_reset')]
     public function PassReset(PasswordReset $passwordResetService, Request $request): Response
     {
-        if ($request->isXmlHttpRequest() && $request->isMethod('POST')) {
+        if ($request->isMethod('POST')) {
             $email = $request->request->get('email');
 
             $result = $passwordResetService->resetPassword($email);
 
-            return new JsonResponse(['result' => $result]);
+            if ($request->isXmlHttpRequest()) {
+                return new JsonResponse(['result' => $result]);
+            }
+            return $this->redirectToRoute('password_reset', [], 303);
         }
         return $this->render('pass_reset/PassReset.html.twig');
     }
