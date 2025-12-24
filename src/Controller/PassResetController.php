@@ -28,11 +28,9 @@ final class PassResetController extends AbstractController
         return $this->render('pass_reset/PassReset.html.twig');
     }
 
-    #[Route('/login/newpass', name: 'new_password')]
-    public function NewPassword(Request $request, NewPassword $newPasswordService): Response
+    #[Route('/login/newpass/{token<\d+>}', name: 'new_password')]
+    public function NewPassword(string $token, Request $request, NewPassword $newPasswordService): Response
     {
-        $token = $request->query->get('token');
-
         if ($request->isXmlHttpRequest() && $request->isMethod('POST')) {
             if($request->request->get('Pass1') === $request->request->get('Pass2'))
             {

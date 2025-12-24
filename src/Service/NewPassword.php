@@ -18,7 +18,10 @@ class NewPassword
     public function changePassword(string $token, string $newPassword)
     {
         $strength = $this->passStrCheck->check($newPassword);
-        $user = $this->userRepository->findOneBy(['id' => $token]);
+        $user = $this->userRepository->find((int) $token);
+        if (!$user) {
+            return NewPasswordResult::isChanged(false, 'Invalid token.');
+        }
 
         if (!$strength['valid']) {
             return NewPasswordResult::isChanged(false,'Password too weak.');

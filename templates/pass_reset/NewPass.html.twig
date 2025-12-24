@@ -65,16 +65,19 @@
     </main>
 
     <script>
-        const form = document.getElementById('NewPass');
+        (() => {
+        const NewPass = document.getElementById('NewPass');
+        if (!NewPass || NewPass.dataset.bound) return;
+            NewPass.dataset.bound = "1";
 
-        if (form) {
-            form.addEventListener('submit', async (e) => {
+
+            NewPass.addEventListener('submit', async (e) => {
                 e.preventDefault();
 
-                const res = await fetch(form.action, {
+                const res = await fetch(NewPass.action, {
                     method: 'POST',
-                    body: new FormData(form),
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    body: new FormData(NewPass),
+                    headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
                     credentials: 'include'
                 });
 
@@ -83,16 +86,22 @@
                 const Pass1 = input1.value;
                 const Pass2 = input2.value;
 
-                if(Pass1 === Pass2) {
+                if (Pass1 === Pass2) {
                     const data = await res.json();
+                    const sent = !!data.result?.isChanged;
 
-                    if (data.result.isChanged) {
-                        document.getElementById('PassChanged').style.display = 'inline';
-                    } else {
-                        document.getElementById('SamePass').style.display = 'inline';
-                    }
+                    document.getElementById('PassChanged').style.display = 'inline';
+                    document.getElementById('SamePass').style.display = 'none';
+
+
+                } else
+                {
+                    document.getElementById('SamePass').style.display = 'inline';
+                    document.getElementById('PassChanged').style.display = 'none';
                 }
+
             });
-        }
+
+        })();
     </script>
 {% endblock %}
