@@ -19,7 +19,7 @@ final class PasswordReset
     {
         $userData = $this->users->findOneBy(['email' => $email]);
         if($userData === null) {
-            return PasswordResetResult::isSent(false, 'Email doesnt Exist');
+            return PasswordResetResult::isSent(false, 'Please try again');
         }
 
         $link = $this->urlGenerator->generate('new_password', ['token' => $userData->getId()], UrlGeneratorInterface::ABSOLUTE_URL);

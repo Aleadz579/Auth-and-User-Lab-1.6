@@ -74,6 +74,15 @@
             NewPass.addEventListener('submit', async (e) => {
                 e.preventDefault();
 
+                const pass1 = document.getElementById('Pass1').value;
+                const pass2 = document.getElementById('Pass2').value;
+
+                if (pass1 !== pass2) {
+                    document.getElementById('SamePass').style.display = 'inline';
+                    document.getElementById('PassChanged').style.display = 'none';
+                    return;
+                }
+
                 const res = await fetch(NewPass.action, {
                     method: 'POST',
                     body: new FormData(NewPass),
@@ -81,26 +90,17 @@
                     credentials: 'include'
                 });
 
-                const input1 = document.getElementById('Pass1');
-                const input2 = document.getElementById('Pass2');
-                const Pass1 = input1.value;
-                const Pass2 = input2.value;
+                const data = await res.json();
+                const changed = !!data.result?.isChanged;
 
-                if (Pass1 === Pass2) {
-                    const data = await res.json();
-                    const sent = !!data.result?.isChanged;
+                document.getElementById('PassChanged').style.display = changed ? 'inline' : 'none';
+                document.getElementById('SamePass').style.display = changed ? 'none' : 'inline';
 
-                    document.getElementById('PassChanged').style.display = 'inline';
-                    document.getElementById('SamePass').style.display = 'none';
-
-
-                } else
-                {
-                    document.getElementById('SamePass').style.display = 'inline';
-                    document.getElementById('PassChanged').style.display = 'none';
+                if (!changed) {
+                    alert(data.result?.error ?? 'Not changed');
                 }
-
             });
+
 
         })();
     </script>
