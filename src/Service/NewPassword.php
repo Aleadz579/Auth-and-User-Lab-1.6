@@ -14,7 +14,6 @@ final class NewPassword
         private EntityManagerInterface $em,
         private PassStrCheck $passStrCheck,
         private ResetTokenCheck $check,
-        private UserRepository $users,
         private PasswordResetTokenRepository $TokenRepo,
     ) {}
 
