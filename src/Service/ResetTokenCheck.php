@@ -11,15 +11,17 @@ class ResetTokenCheck
     {
         [$selector, $verifier] = explode('.', $UrlToken, 2);
 
-        $reset = $this->TokenRepo->findOneBy(['selector' => $selector]);
+        $Token = $this->TokenRepo->findOneBy(['selector' => $selector]);
 
-        if (!$reset || $reset->isExpired() || $reset->isConsumed()) {
+        if (!$Token || $Token->isExpired() || $Token->isConsumed()) {
             return [false, null];
         }
 
-        if (!password_verify($verifier, $reset->getHashedVerifier())) {
+        if (!hash_equals($Token->getHashedVerifier(), hash('sha256', $verifier))) {
             return [false, null];
         }
-        return [true, $selector];
+
+        $Token->setConsumedAt(new \DateTimeImmutable());
+        return [true, $selector, $Token];
     }
 }

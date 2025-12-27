@@ -22,14 +22,14 @@ final class PasswordReset
     {
         $userData = $this->users->findOneBy(['email' => $email]);
 
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL) || !$userData) {
             return PasswordResetResult::isSent(false, 'Not a valid email');
         }
 
         $selector = bin2hex(random_bytes(16));
         $verifier = bin2hex(random_bytes(32));
         $UrlToken = $selector . '.' . $verifier;
-        $hashedVerifier = password_hash($verifier, PASSWORD_ARGON2ID);
+        $hashedVerifier = hash('sha256', $verifier);
         $RequestedAt = new \DateTimeImmutable();
         $ExpiresAt = $RequestedAt->add(new \DateInterval('PT1H'));
 
