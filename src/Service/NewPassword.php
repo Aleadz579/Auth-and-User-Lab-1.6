@@ -21,9 +21,10 @@ final class NewPassword
     public function changePassword(string $URLToken, string $newPassword)
     {
         $strength = $this->passStrCheck->check($newPassword);
-        $TokenCheck = $this->check->tokenCheck($URLToken);
-        $TokenID = $this->TokenRepo->findOneBy(['URLToken' => $URLToken]);
-        $user = $this->users->findOneBy(['id' => $TokenID]);
+        [$TokenCheck, $Selector] = $this->check->tokenCheck($URLToken);
+        dump($TokenCheck, $Selector);
+        $TokenID = $this->TokenRepo->findOneBy(['selector' => $Selector]);
+        $user = $TokenID->getUser();
         if (!$TokenCheck) {
             return NewPasswordResult::isChanged(false, 'Invalid token.');
         }
