@@ -1,9 +1,6 @@
 <?php
 
 namespace App\Service;
-
-use App\Entity\User;
-
 final class PasswordResetResult
 {
     private function __construct(

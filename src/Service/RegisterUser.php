@@ -26,7 +26,7 @@ final class RegisterUser
             return RegisterResult::fail('Password too weak.');
         }
 
-        $user = (new User())
+        $user = new User()
             ->setUsername($username)
             ->setIsActive(true);
 

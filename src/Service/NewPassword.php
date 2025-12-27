@@ -3,23 +3,28 @@
 namespace App\Service;
 
 use App\Repository\UserRepository;
+use App\Repository\PasswordResetTokenRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
-class NewPassword
+final class NewPassword
 {
     public function __construct(
         private UserPasswordHasherInterface $passwordHasher,
-        private UserRepository $userRepository,
         private EntityManagerInterface $em,
         private PassStrCheck $passStrCheck,
+        private ResetTokenCheck $check,
+        private UserRepository $users,
+        private PasswordResetTokenRepository $TokenRepo,
     ) {}
 
-    public function changePassword(string $token, string $newPassword)
+    public function changePassword(string $URLToken, string $newPassword)
     {
         $strength = $this->passStrCheck->check($newPassword);
-        $user = $this->userRepository->find((int) $token);
-        if (!$user) {
+        $TokenCheck = $this->check->tokenCheck($URLToken);
+        $TokenID = $this->TokenRepo->findOneBy(['URLToken' => $URLToken]);
+        $user = $this->users->findOneBy(['id' => $TokenID]);
+        if (!$TokenCheck) {
             return NewPasswordResult::isChanged(false, 'Invalid token.');
         }
 

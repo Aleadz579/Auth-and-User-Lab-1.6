@@ -10,6 +10,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use App\Service\PasswordReset;
 use App\Service\NewPassword;
 
+
 final class PassResetController extends AbstractController
 {
     #[Route('/login/reset', name: 'password_reset')]
@@ -28,7 +29,7 @@ final class PassResetController extends AbstractController
         return $this->render('pass_reset/PassReset.html.twig');
     }
 
-    #[Route('/login/newpass/{token<\d+>}', name: 'new_password')]
+    #[Route('/login/newpass/{token<[^/]+>}', name: 'new_password')]
     public function NewPassword(string $token, Request $request, NewPassword $newPasswordService): Response
     {
         if ($request->isXmlHttpRequest() && $request->isMethod('POST')) {

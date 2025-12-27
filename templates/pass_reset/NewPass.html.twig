@@ -55,6 +55,7 @@
                     </div>
                     <span id="SamePass" style="display:none;">Passwords must be identical!</span>
                     <span id="PassChanged" style="display:none;">Password successfully changed!</span>
+                    <span id="PassTooWeak" style="display:none; color: red">New Password is too Weak!</span>
                     <div class="actions">
                         <button class="btn btn--primary" type="submit">Reset Password</button>
                         <a class="link muted" href="/login">Back to login</a>
@@ -97,7 +98,10 @@
                 document.getElementById('SamePass').style.display = changed ? 'none' : 'inline';
 
                 if (!changed) {
-                    alert(data.result?.error ?? 'Not changed');
+                    document.getElementById('PassTooWeak').style.display = 'inline';
+                    document.getElementById('SamePass').style.display = 'none';
+                }else {
+                    document.getElementById('PassChanged').style.display = 'inline';
                 }
             });
 

@@ -2,7 +2,9 @@
 
 namespace App\Service;
 
+use App\Entity\PasswordResetToken;
 use App\Repository\UserRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -13,16 +15,35 @@ final class PasswordReset
         private UserRepository $users,
         private MailerInterface $mailer,
         private UrlGeneratorInterface $urlGenerator,
+        private EntityManagerInterface $entityManager,
     ) {}
 
     public function resetPassword(string $email): PasswordResetResult
     {
         $userData = $this->users->findOneBy(['email' => $email]);
-        if($userData === null) {
-            return PasswordResetResult::isSent(false, 'Please try again');
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return PasswordResetResult::isSent(false, 'Not a valid email');
         }
 
-        $link = $this->urlGenerator->generate('new_password', ['token' => $userData->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
+        $selector = bin2hex(random_bytes(16));
+        $verifier = bin2hex(random_bytes(32));
+        $UrlToken = $selector . '.' . $verifier;
+        $hashedVerifier = password_hash($verifier, PASSWORD_ARGON2ID);
+        $RequestedAt = new \DateTimeImmutable();
+        $ExpiresAt = $RequestedAt->add(new \DateInterval('PT1H'));
+
+        $token = new PasswordResetToken()
+            ->setUser($userData)
+            ->setSelector($selector)
+            ->setHashedVerifier($hashedVerifier)
+            ->setRequestedAt($RequestedAt)
+            ->setExpiresAt($ExpiresAt);
+
+        $this->entityManager->persist($token);
+        $this->entityManager->flush();
+
+        $link = $this->urlGenerator->generate('new_password', ['token' => $UrlToken], UrlGeneratorInterface::ABSOLUTE_URL);
         $userName = $userData->getUsername();
         $userEmail = $userData->getEmail();
 
