@@ -8,7 +8,6 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 use App\Repository\UserRepository;
-use Doctrine\ORM\EntityManagerInterface;
 use App\Service\emailAdder;
 final class HomePageController extends AbstractController
 {
