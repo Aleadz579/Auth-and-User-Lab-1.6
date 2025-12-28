@@ -23,7 +23,7 @@ final class PasswordReset
         $userData = $this->users->findOneBy(['email' => $email]);
 
         if (!filter_var($email, FILTER_VALIDATE_EMAIL) || !$userData) {
-            return PasswordResetResult::isSent(false, 'Not a valid email');
+            return PasswordResetResult::isSent(false);
         }
 
         $selector = bin2hex(random_bytes(16));

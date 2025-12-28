@@ -50,15 +50,14 @@
                     <div class="field">
                         <label class="label" for="email">Email</label>
                         <input class="input" id="emailInput" name="email" type="email" autocomplete="email" required>
-                        <small id="EmailHint" class="hint muted">If an account exists, you’ll receive an email.</small>
-                        <span id="SentHint" style="display:none; color: greenyellow">Email sent!</span>
-                        <span id="ExistHint" style="display:none; color: red">This Email isn't connected to any Account!</span>
+                        <small id="EmailHint" class="hint">If an account exists, you’ll receive an email.</small>
                     </div>
 
                     <div class="actions">
-                        <button class="btn btn--primary" type="submit">Send reset link</button>
+                        <button id="sendResetBtn" class="btn btn--primary" type="submit">Send reset link</button>
                         <a class="link muted" href="/login">Back to login</a>
                     </div>
+                    <span id="countdown"  style="color: darkgrey"></span>
                 </form>
             </section>
 
@@ -66,29 +65,52 @@
     </main>
 
     <script>
-        (() => {
-            const emailForm = document.getElementById('emailForm');
-            if (!emailForm || emailForm.dataset.bound) return;
-            emailForm.dataset.bound = "1";
+        const el = document.getElementById('countdown');
+        const emailForm = document.getElementById('emailForm');
+        const btn = document.getElementById('sendResetBtn');
 
+        if (emailForm && btn && el) {
             emailForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
+
+                const end = Date.now() + 60 * 1000;
+
+                btn.disabled = true;
+
+                const timer = setInterval(() => {
+                    const remaining = end - Date.now();
+
+                    if (remaining <= 0) {
+                        clearInterval(timer);
+                        btn.disabled = false;
+                        el.textContent = "";
+                        return;
+                    }
+
+                    const totalSeconds = Math.ceil(remaining / 1000);
+                    const mins = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+                    const secs = String(totalSeconds % 60).padStart(2, '0');
+
+                    el.textContent = `Didn't receive an email? Try again in ${mins}:${secs}`;
+                }, 250);
 
                 const res = await fetch(emailForm.action, {
                     method: 'POST',
                     body: new FormData(emailForm),
-                    headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    },
                     credentials: 'include'
                 });
 
                 const data = await res.json();
-                const sent = !!data.result?.isSent;
 
-                document.getElementById('EmailHint').style.display = 'none';
-                document.getElementById('SentHint').style.display = sent ? 'inline' : 'none';
-                document.getElementById('ExistHint').style.display = sent ? 'none' : 'inline';
+
+
             });
-        })();
+        }
     </script>
+
 
 {% endblock %}

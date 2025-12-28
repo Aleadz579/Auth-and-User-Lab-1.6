@@ -20,8 +20,8 @@ final class NewPassword
     public function changePassword(string $URLToken, string $newPassword)
     {
         $strength = $this->passStrCheck->check($newPassword);
-        [$TokenCheck, $Selector, $Token] = $this->check->tokenCheck($URLToken);
-        $user = $Token->getUser();
+        [$TokenCheck, $Token] = $this->check->tokenCheck($URLToken);
+
         if (!$TokenCheck) {
             return NewPasswordResult::isChanged(false, 'Invalid token.');
         }
@@ -30,12 +30,16 @@ final class NewPassword
             return NewPasswordResult::isChanged(false,'Password too weak.');
         }
 
+        $user = $Token->getUser();
+
         $hashed = $this->passwordHasher->hashPassword($user, $newPassword);
 
         $user->setPassword($hashed);
 
         $this->em->persist($user);
         $this->em->flush();
+
+        $Token->setConsumedAt(new \DateTimeImmutable());
 
         return NewPasswordResult::isChanged(true);
     }

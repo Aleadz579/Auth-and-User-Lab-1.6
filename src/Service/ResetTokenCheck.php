@@ -7,7 +7,7 @@ use App\Repository\PasswordResetTokenRepository;
 class ResetTokenCheck
 {
     public function __construct(private PasswordResetTokenRepository $TokenRepo){}
-    public function tokenCheck($UrlToken) : array
+    public function tokenCheck(string $UrlToken) : array
     {
         [$selector, $verifier] = explode('.', $UrlToken, 2);
 
@@ -21,7 +21,7 @@ class ResetTokenCheck
             return [false, null];
         }
 
-        $Token->setConsumedAt(new \DateTimeImmutable());
-        return [true, $selector, $Token];
+
+        return [true, $Token];
     }
 }

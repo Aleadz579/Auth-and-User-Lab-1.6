@@ -68,7 +68,7 @@
             {% block importmap %}{{ importmap('app') }}{% endblock %}
         {% endblock %}
     </head>
-            <body>
+            <body data-turbo="false">
                 <div class="container">
                     {% for label, messages in app.flashes %}
                         {% for message in messages %}

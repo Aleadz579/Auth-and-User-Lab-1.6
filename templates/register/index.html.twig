@@ -62,6 +62,7 @@
             {{ form_row(Register.username) }}
             {{ form_row(Register.plainPassword) }}
             <button class="authbtn" type="submit">Register</button>
+            <span>Already have an Account? <a style="color: white" href="{{ path('app_login') }}">Login</a></span>
             {{ form_end(Register) }}
         </div>
     </div>
