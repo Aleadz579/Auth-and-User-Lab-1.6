@@ -15,7 +15,7 @@ class emailAdder
         private MailerInterface $mailer,
     ){}
 
-    public function addEmail(string $email, $userData): bool
+    public function addEmail(string $email, $userData, $state): array
     {
         $now = $this->clock->now();
         $code = random_int(100000, 999999);
@@ -23,20 +23,28 @@ class emailAdder
 
         //$userData->setEmail($email);
 
-        $email = (new Email())
-            ->from('leadzauthlab@gmail.com')
-            ->to($email)
-            ->subject('Confirmation Email')
-            ->html('<header>Verify your email</header>
-                          <p>Enter this code to confirm this is the Right email</p>
-                          <p>' . $code . '</p>');
+        if () {
+            $email = (new Email())
+                ->from('leadzauthlab@gmail.com')
+                ->to($email)
+                ->subject('Confirmation Email')
+                ->html('<header>Verify your email</header>
+                              <p>Enter this code to confirm this is the Right email</p>
+                              <p>' . $code . '</p>');
+            $this->mailer->send($email);
 
-        $this->mailer->send($email);
+            return [
+                'emailSent' => true,
+                'emailConfirmed' => false,
+            ];
+        }
+
+
         //$userData->setEmailVerifiedAt($now);
 
         //$this->em->flush();
         $emailAdded = true;
 
-        return $emailAdded;
+        return [true, true];
     }
 }

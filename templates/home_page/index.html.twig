@@ -49,15 +49,18 @@
         <div id="emailDisplay">
             {% if hasEmail %}
                 <p>Your email is: {{ email }}</p>
-            {% else %}
-                <form id="emailForm" method="post" >
-                    <input id="emailInput" type="email" name="email" required>
-                    <button type="submit">Add</button>
-                </form>
             {% endif %}
-            <span id="emailTaken" style="display: none">Email is taken</span>
-        </div>
+            <form id="emailForm" method="post" style="display: none">
+                <input id="emailInput" type="email" name="email" required>
+                <button type="submit">Add</button>
+                <small id="emailTaken" style="display:none;" aria-live="polite">Email is taken</small>
+            </form>
 
+            <form id="codeForm" method="post" style="display: none">
+                <input id="codeInput" type="number" name="code" required>
+                <button type="submit">Confirm</button>
+            </form>
+        </div>
     </section>
 
 
@@ -80,12 +83,7 @@
 
             const data = await res.json();
 
-            if (data.emailAdded) {
-                document.getElementById('emailDisplay').innerHTML =
-                    `<p>Your email is: ${email}</p>`;
-            } else if(data.emailExists)
-            {
-                document.getElementById('emailTaken').style.display = 'inline';
+            if (data.emailSent && !data.emailConfirmed) {
 
             }
         });}

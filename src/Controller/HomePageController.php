@@ -16,7 +16,6 @@ final class HomePageController extends AbstractController
     public function index(UserRepository $userRepository, Request $request, emailAdder $emailAdder): Response
     {
         $emailAdded = false;
-        $emailExists = false;
         $hasEmail = false;
         $userData = $this->getUser();
         $SessionUsername = $userData->getUsername();
@@ -27,15 +26,20 @@ final class HomePageController extends AbstractController
 
         if ($request->isXmlHttpRequest() && $request->isMethod('POST')) {
             $email = (string) $request->request->get('email');
+            $code = (string) $request->request->get('code');
 
             if ($userData->getEmail() == null || $userData->getEmail() == '') {
-                if($userRepository->findOneBy(['email' => $email]) == null){
-                    $emailAdded = $emailAdder->addEmail($email, $userData);
+                if($userRepository->findOneBy(['email' => $email]) !== null) {
+                    return new JsonResponse(['emailExists' => $emailExists = true]);
                 }else {
-                    $emailExists = true;
+                    if ($email) {
+                        $emailAdded = $emailAdder->addEmail($email, $userData, $sent = true);
+                    }else if ($code) {
+                        $emailAdded = $emailAdder->addEmail($email, $userData, $sent = false);
+                    }
                 }
             }
-            return new JsonResponse(['emailAdded' => $emailAdded, 'emailExists' => $emailExists]);
+            return new JsonResponse(['emailAdded' => $emailAdded]);
         }
 
         if($userData->getEmail() !== null && $userData->getEmail() !== '') {
