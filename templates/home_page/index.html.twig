@@ -49,30 +49,34 @@
         <div id="emailDisplay">
             {% if hasEmail %}
                 <p>Your email is: {{ email }}</p>
-            {% endif %}
-            <form id="emailForm" method="post" style="display: none">
+            {% else %}
+            <form id="emailForm" method="post">
+                <p>Enter your Email</p>
                 <input id="emailInput" type="email" name="email" required>
                 <button type="submit">Add</button>
                 <small id="emailTaken" style="display:none;" aria-live="polite">Email is taken</small>
             </form>
-
+            {% endif %}
             <form id="codeForm" method="post" style="display: none">
+                <p>Enter the Code we sent you</p>
                 <input id="codeInput" type="number" name="code" required>
                 <button type="submit">Confirm</button>
+                <small id="wrongCode" style="display:none;" aria-live="polite">Wrong Code</small>
             </form>
         </div>
     </section>
 
 
     <script>
-        const form = document.getElementById('emailForm');
+        const emailForm = document.getElementById('emailForm');
+        const codeForm  = document.getElementById('codeForm');
 
-        if (form) {
-        form.addEventListener('submit', async (e) => {
+        async function ajaxSubmit(e) {
             e.preventDefault();
+            const form = e.currentTarget;
 
-            const input = document.getElementById('emailInput');
-            const email = input.value;
+            document.getElementById('wrongCode').style.display = 'none';
+            document.getElementById('emailTaken').style.display = 'none';
 
             const res = await fetch(form.action, {
                 method: 'POST',
@@ -83,9 +87,29 @@
 
             const data = await res.json();
 
-            if (data.emailSent && !data.emailConfirmed) {
-
+            if (!data.emailSent) {
+                emailForm.style.display = 'inline';
+                codeForm.style.display = 'none';
+            } else if (data.emailSent && !data.emailConfirmed) {
+                codeForm.style.display = 'inline';
+                emailForm.style.display = 'none';
+            } else {
+                codeForm.style.display = 'none';
+                emailForm.style.display = 'none';
+                document.getElementById('emailDisplay').innerHTML =
+                    `<p>Your email is: ${data.email}</p>`;
             }
-        });}
+
+            if (data.error) {
+                document.getElementById('wrongCode').style.display = 'inline';
+            }
+            if (data.emailExists) {
+                document.getElementById('emailTaken').style.display = 'inline';
+            }
+        }
+
+        emailForm?.addEventListener('submit', ajaxSubmit);
+        codeForm?.addEventListener('submit', ajaxSubmit);
     </script>
+
 {% endblock %}

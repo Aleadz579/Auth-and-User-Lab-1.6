@@ -30,16 +30,20 @@ final class HomePageController extends AbstractController
 
             if ($userData->getEmail() == null || $userData->getEmail() == '') {
                 if($userRepository->findOneBy(['email' => $email]) !== null) {
-                    return new JsonResponse(['emailExists' => $emailExists = true]);
+                    return new JsonResponse($emailExists = true);
                 }else {
                     if ($email) {
-                        $emailAdded = $emailAdder->addEmail($email, $userData, $sent = true);
+                        $emailAdded = $emailAdder->addEmail($email, $userData, $state = true);
+
+                        return new JsonResponse($emailAdded);
                     }else if ($code) {
-                        $emailAdded = $emailAdder->addEmail($email, $userData, $sent = false);
+                        $emailAdded = $emailAdder->addEmail($code, $userData, $state = false);
+
+                        return new JsonResponse($emailAdded);
                     }
                 }
             }
-            return new JsonResponse(['emailAdded' => $emailAdded]);
+            return new JsonResponse(['hasEmail' => $hasEmail = true]);
         }
 
         if($userData->getEmail() !== null && $userData->getEmail() !== '') {
