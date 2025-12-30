@@ -3,13 +3,12 @@
 namespace App\Service;
 
 use Doctrine\ORM\EntityManagerInterface;
-use App\Repository\AuthEventLogRepository;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 final class NewPassword
 {
     public function __construct(
-        private AuthEventLogRepository $logger,
+        private AuthLogger $logger,
         private UserPasswordHasherInterface $passwordHasher,
         private EntityManagerInterface $em,
         private PassStrCheck $passStrCheck,

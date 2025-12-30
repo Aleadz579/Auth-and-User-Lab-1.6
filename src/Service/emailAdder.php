@@ -5,16 +5,19 @@ namespace App\Service;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Clock\ClockInterface;
 use Symfony\Component\Mime\Email;
+use App\Repository\AuthEventLogRepository;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 class emailAdder
 {
     public function __construct(
+        private AuthLogger $logger,
         private ClockInterface $clock,
         private EntityManagerInterface $em,
         private MailerInterface $mailer,
         private RequestStack $requestStack,
+        private AuthEventLogRepository $authLogRepo,
     ){}
 
     public function addEmail(string $input, $userData, bool $state): array
@@ -40,6 +43,18 @@ class emailAdder
             $session->set('code', $code);
             $session->set('timeSent', $now = $this->clock->now());
 
+            $this->logger->log('verification_email', true, $tempEmail, null, $userData);
+
+            $ip = $this->requestStack->getCurrentRequest()?->getClientIp() ?? 'unknown';
+            $failed = $this->authLogRepo->countFailedByIpInLastMinutes('verification_email', $ip, 10);
+
+            if ($failed >= 5) {
+                return [
+                    'emailSent' => true,
+                    'emailConfirmed' => false,
+                    'error' => 'Email sent too often',
+                ];
+            }
 
             return [
                 'emailSent' => true,
@@ -55,6 +70,7 @@ class emailAdder
                 $now = $this->clock->now();
 
                 if (!$timeSent instanceof \DateTimeInterface) {
+                    $this->logger->log('code_input', false, null, 'inactive_code', $userData);
                     return [
                         'emailSent' => false,
                         'emailConfirmed' => false,
@@ -63,11 +79,11 @@ class emailAdder
                 }
 
                 if ($timeSent->add(new \DateInterval('PT10M')) <= $now) {
-                    $error = 'Expired code';
+                    $this->logger->log('code_input', false, null, 'expired_code', $userData);
                     return [
                         'emailSent' => true,
                         'emailConfirmed' => false,
-                        'error' => $error,
+                        'error' => 'Expired code',
                     ];
                 } else {
                     $now = $this->clock->now();
@@ -79,6 +95,8 @@ class emailAdder
 
                     $this->em->flush();
 
+                    $this->logger->log('verify_email', true, null, null, $userData);
+
                     return [
                         'emailSent' => true,
                         'emailConfirmed' => true,
@@ -87,15 +105,28 @@ class emailAdder
                     ];
                 }
             } else {
-                $error = 'Wrong code';
+                $this->logger->log('verify_email', false, null, 'wrong_code', $userData);
+
+                $ip = $this->requestStack->getCurrentRequest()?->getClientIp() ?? 'unknown';
+                $failed = $this->authLogRepo->countFailedByIpInLastMinutes('verify_email', $ip, 10);
+
+                if ($failed >= 5) {
+                    return [
+                        'emailSent' => true,
+                        'emailConfirmed' => false,
+                        'error' => 'Too many incorrect attempts',
+                    ];
+                }
+
                 return [
                     'emailSent' => true,
                     'emailConfirmed' => false,
-                    'error' => $error,
+                    'error' => 'Wrong code',
                 ];
             }
         }
 
+        $this->logger->log('add_email', false, null, 'something_else', $userData, [$input, $userData, $state]);
         return [
             'emailSent' => false,
             'emailConfirmed' => false,

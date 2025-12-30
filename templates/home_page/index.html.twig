@@ -55,6 +55,7 @@
                 <input id="emailInput" type="email" name="email" required>
                 <button type="submit">Add</button>
                 <small id="emailTaken" style="display:none;" aria-live="polite">Email is taken</small>
+                <small id="EmailIsSent" style="display:none;" aria-live="polite">Email is already sent</small>
                 <input type="hidden" name="_token" value="{{ csrf_token('add_email') }}">
             </form>
             {% endif %}
@@ -63,6 +64,7 @@
                 <input id="codeInput" type="number" name="code" required>
                 <button type="submit">Confirm</button>
                 <small id="wrongCode" style="display:none;" aria-live="polite">Wrong Code</small>
+                <small id="tooManyAttempts" style="display:none;" aria-live="polite">Too many incorrect attempts, try again later.</small>
                 <input type="hidden" name="_token" value="{{ csrf_token('confirm_email') }}">
             </form>
         </div>
@@ -79,6 +81,7 @@
 
             document.getElementById('wrongCode').style.display = 'none';
             document.getElementById('emailTaken').style.display = 'none';
+            document.getElementById('tooManyAttempts').style.display = 'none';
 
             const res = await fetch(form.action, {
                 method: 'POST',
@@ -102,8 +105,12 @@
                     `<p>Your email is: ${data.email}</p>`;
             }
 
-            if (data.error) {
+            if (data.error === 'Wrong code') {
                 document.getElementById('wrongCode').style.display = 'inline';
+            } else if (data.error === 'Too many incorrect attempts') {
+                document.getElementById('tooManyAttempts').style.display = 'inline';
+            } else if (data.error === 'Email sent too often') {
+                document.getElementById('EmailIsSent').style.display = 'inline';
             }
             if (data.emailExists) {
                 document.getElementById('emailTaken').style.display = 'inline';

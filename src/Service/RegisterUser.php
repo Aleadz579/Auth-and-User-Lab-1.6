@@ -3,14 +3,13 @@
 namespace App\Service;
 
 use App\Entity\User;
-use App\Repository\AuthEventLogRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 final class RegisterUser
 {
     public function __construct(
-        private AuthEventLogRepository $logger,
+        private AuthLogger $logger,
         private UserRepository $users,
         private EntityManagerInterface $em,
         private UserPasswordHasherInterface $hasher,
@@ -19,8 +18,8 @@ final class RegisterUser
 
     public function register(string $username, string $plainPassword): RegisterResult
     {
-        if ($tempuser = $this->users->findOneBy(['username' => $username])) {
-            $this->logger->log('register_attempt', false, $username, 'already_exists',$tempuser);
+        if ($this->users->findOneBy(['username' => $username])) {
+            $this->logger->log('register_attempt', false, $username, 'already_exists');
             return RegisterResult::fail('Username already exists.');
         }
 

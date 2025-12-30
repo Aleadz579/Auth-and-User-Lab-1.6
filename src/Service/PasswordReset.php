@@ -3,18 +3,21 @@
 namespace App\Service;
 
 use App\Entity\PasswordResetToken;
-use App\Repository\UserRepository;
 use App\Repository\AuthEventLogRepository;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 final class PasswordReset
 {
     public function __construct(
-        private AuthEventLogRepository $logger,
+        private RequestStack $requestStack,
+        private AuthLogger $logger,
         private UserRepository $users,
+        private AuthEventLogRepository $authLogRepo,
         private MailerInterface $mailer,
         private UrlGeneratorInterface $urlGenerator,
         private EntityManagerInterface $entityManager,
@@ -25,12 +28,19 @@ final class PasswordReset
         $userData = $this->users->findOneBy(['email' => $email]);
 
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $this->logger->log('password_reset_request', false, $email, 'invalid_email_format', null);
+            $this->logger->log('password_reset_request', false, $email, 'invalid_email_format');
             return PasswordResetResult::isSent(true);
         }
 
         if(!$userData) {
-            $this->logger->log('password_reset_request', false, $email, 'email_not_found', null);
+            $this->logger->log('password_reset_request', false, $email, 'email_not_found');
+            return PasswordResetResult::isSent(true);
+        }
+
+        $ip = $this->requestStack->getCurrentRequest()?->getClientIp() ?? 'unknown';
+        $failed = $this->authLogRepo->countFailedByIpInLastMinutes('password_reset_request', $ip, 10);
+
+        if ($failed >= 5) {
             return PasswordResetResult::isSent(true);
         }
 
@@ -63,7 +73,7 @@ final class PasswordReset
 
         $this->mailer->send($email);
 
-        $this->logger->log('password_reset_request', true, $email, null);
+        $this->logger->log('password_reset_request', true, $userEmail);
 
         return PasswordResetResult::isSent(true);
     }

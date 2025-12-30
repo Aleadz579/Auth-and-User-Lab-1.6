@@ -1,4 +1,6 @@
 security:
+
+
     # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
     password_hashers:
         App\Entity\User: 'auto'
@@ -43,6 +45,9 @@ security:
                 secure: auto
                 httponly: true
                 samesite: lax
+            login_throttling:
+                max_attempts: 5
+                interval: '1 minute'
 
             # Activate different ways to authenticate:
             # https://symfony.com/doc/current/security.html#the-firewall

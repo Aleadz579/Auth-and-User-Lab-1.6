@@ -9,11 +9,12 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 use App\Repository\UserRepository;
 use App\Service\emailAdder;
+use App\Service\AuthLogger;
 final class HomePageController extends AbstractController
 {
 
     #[Route('/homepage', name: 'app_home_page', methods: ['GET','POST'])]
-    public function index(UserRepository $userRepository, Request $request, emailAdder $emailAdder): Response
+    public function index(UserRepository $userRepository, Request $request, emailAdder $emailAdder, AuthLogger $logger): Response
     {
         $hasEmail = false;
         $userData = $this->getUser();
@@ -30,10 +31,12 @@ final class HomePageController extends AbstractController
 
             if ($userData->getEmail() == null || $userData->getEmail() == '') {
                 if($userRepository->findOneBy(['email' => $email]) !== null) {
+                    $logger->log('email_add_attempt', false, $email, 'email_exists', $userData);
                     return new JsonResponse(['emailExists' => true]);
                 }else {
                     if ($email) {
                         if (!$this->isCsrfTokenValid('add_email', $token)) {
+                            $logger->log('csrf_attempt', false);
                             return $this->json(['error' => 'csrf'], 400);
                         }
 
@@ -42,6 +45,7 @@ final class HomePageController extends AbstractController
                         return new JsonResponse($emailAdded);
                     }else if ($code) {
                         if (!$this->isCsrfTokenValid('confirm_email', $token)) {
+                            $logger->log('csrf_attempt', false);
                             return $this->json(['error' => 'csrf'], 400);
                         }
 
