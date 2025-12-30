@@ -93,15 +93,19 @@
 
                 const data = await res.json();
                 const changed = !!data.result?.isChanged;
+                const error = data.result?.error;
 
-                document.getElementById('PassChanged').style.display = changed ? 'inline' : 'none';
-                document.getElementById('SamePass').style.display = changed ? 'none' : 'inline';
-
-                if (!changed) {
-                    document.getElementById('PassTooWeak').style.display = 'inline';
-                    document.getElementById('SamePass').style.display = 'none';
-                }else {
+                if (changed) {
                     document.getElementById('PassChanged').style.display = 'inline';
+                } else {
+
+                    if (error === 'Password too weak.') {
+                        document.getElementById('PassTooWeak').style.display = 'inline';
+                    } else if (error === 'Invalid token.') {
+                        document.getElementById('InvalidToken').style.display = 'inline';
+                    } else {
+                        document.getElementById('SamePass').style.display = 'inline';
+                    }
                 }
             });
 

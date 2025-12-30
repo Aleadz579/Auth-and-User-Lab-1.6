@@ -2,19 +2,19 @@
 
 namespace App\Service;
 
-use App\Repository\UserRepository;
-use App\Repository\PasswordResetTokenRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Repository\AuthEventLogRepository;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 final class NewPassword
 {
     public function __construct(
+        private AuthEventLogRepository $logger,
         private UserPasswordHasherInterface $passwordHasher,
         private EntityManagerInterface $em,
         private PassStrCheck $passStrCheck,
         private ResetTokenCheck $check,
-        private PasswordResetTokenRepository $TokenRepo,
+
     ) {}
 
     public function changePassword(string $URLToken, string $newPassword)
@@ -23,10 +23,12 @@ final class NewPassword
         [$TokenCheck, $Token] = $this->check->tokenCheck($URLToken);
 
         if (!$TokenCheck) {
+            $this->logger->log('passChange_attempt', false, null, 'invalid_token', null);
             return NewPasswordResult::isChanged(false, 'Invalid token.');
         }
 
         if (!$strength['valid']) {
+            $this->logger->log('passChange_attempt', false, null, 'weak_password', $Token->getUser());
             return NewPasswordResult::isChanged(false,'Password too weak.');
         }
 
@@ -40,7 +42,7 @@ final class NewPassword
         $this->em->persist($user);
         $this->em->flush();
 
-
+        $this->logger->log('passChange_attempt', true, $user->getUsername(), null, $user->getUser());
 
         return NewPasswordResult::isChanged(true);
     }

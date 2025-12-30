@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Entity\PasswordResetToken;
 use App\Repository\UserRepository;
+use App\Repository\AuthEventLogRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
@@ -12,6 +13,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 final class PasswordReset
 {
     public function __construct(
+        private AuthEventLogRepository $logger,
         private UserRepository $users,
         private MailerInterface $mailer,
         private UrlGeneratorInterface $urlGenerator,
@@ -22,8 +24,14 @@ final class PasswordReset
     {
         $userData = $this->users->findOneBy(['email' => $email]);
 
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL) || !$userData) {
-            return PasswordResetResult::isSent(false);
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $this->logger->log('password_reset_request', false, $email, 'invalid_email_format', null);
+            return PasswordResetResult::isSent(true);
+        }
+
+        if(!$userData) {
+            $this->logger->log('password_reset_request', false, $email, 'email_not_found', null);
+            return PasswordResetResult::isSent(true);
         }
 
         $selector = bin2hex(random_bytes(16));
@@ -47,13 +55,15 @@ final class PasswordReset
         $userName = $userData->getUsername();
         $userEmail = $userData->getEmail();
 
-        $email = (new Email())
+        $email = new Email()
             ->from('leadzauthlab@gmail.com')
             ->to($userEmail)
             ->subject($userName)
             ->html('<p>Click here: <a href="' . $link . '">Open the app</a></p>');
 
         $this->mailer->send($email);
+
+        $this->logger->log('password_reset_request', true, $email, null);
 
         return PasswordResetResult::isSent(true);
     }
