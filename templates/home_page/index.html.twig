@@ -55,6 +55,7 @@
                 <input id="emailInput" type="email" name="email" required>
                 <button type="submit">Add</button>
                 <small id="emailTaken" style="display:none;" aria-live="polite">Email is taken</small>
+                <input type="hidden" name="_token" value="{{ csrf_token('add_email') }}">
             </form>
             {% endif %}
             <form id="codeForm" method="post" style="display: none">
@@ -62,6 +63,7 @@
                 <input id="codeInput" type="number" name="code" required>
                 <button type="submit">Confirm</button>
                 <small id="wrongCode" style="display:none;" aria-live="polite">Wrong Code</small>
+                <input type="hidden" name="_token" value="{{ csrf_token('confirm_email') }}">
             </form>
         </div>
     </section>

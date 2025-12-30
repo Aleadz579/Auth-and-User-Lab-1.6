@@ -15,7 +15,6 @@ final class HomePageController extends AbstractController
     #[Route('/homepage', name: 'app_home_page', methods: ['GET','POST'])]
     public function index(UserRepository $userRepository, Request $request, emailAdder $emailAdder): Response
     {
-        $emailAdded = false;
         $hasEmail = false;
         $userData = $this->getUser();
         $SessionUsername = $userData->getUsername();
@@ -27,23 +26,32 @@ final class HomePageController extends AbstractController
         if ($request->isXmlHttpRequest() && $request->isMethod('POST')) {
             $email = (string) $request->request->get('email');
             $code = (string) $request->request->get('code');
+            $token  = (string) $request->request->get('_token');
 
             if ($userData->getEmail() == null || $userData->getEmail() == '') {
                 if($userRepository->findOneBy(['email' => $email]) !== null) {
-                    return new JsonResponse($emailExists = true);
+                    return new JsonResponse(['emailExists' => true]);
                 }else {
                     if ($email) {
-                        $emailAdded = $emailAdder->addEmail($email, $userData, $state = true);
+                        if (!$this->isCsrfTokenValid('add_email', $token)) {
+                            return $this->json(['error' => 'csrf'], 400);
+                        }
+
+                        $emailAdded = $emailAdder->addEmail($email, $userData,true);
 
                         return new JsonResponse($emailAdded);
                     }else if ($code) {
-                        $emailAdded = $emailAdder->addEmail($code, $userData, $state = false);
+                        if (!$this->isCsrfTokenValid('confirm_email', $token)) {
+                            return $this->json(['error' => 'csrf'], 400);
+                        }
+
+                        $emailAdded = $emailAdder->addEmail($code, $userData,false);
 
                         return new JsonResponse($emailAdded);
                     }
                 }
             }
-            return new JsonResponse(['hasEmail' => $hasEmail = true]);
+            return new JsonResponse(['hasEmail' => true]);
         }
 
         if($userData->getEmail() !== null && $userData->getEmail() !== '') {

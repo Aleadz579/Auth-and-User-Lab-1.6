@@ -27,7 +27,7 @@ final class RegisterController extends AbstractController
             $result = $registerUserService->register($username, $plainPassword);
 
             if (!$result->success) {
-                $this->addFlash('error', 'Username already exists.');
+                $this->addFlash('error', $result->error);
                 return $this->redirectToRoute('app_register');
             }
             return $this->redirectToRoute('app_login');

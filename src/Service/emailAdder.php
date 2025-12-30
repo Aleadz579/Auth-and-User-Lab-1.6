@@ -17,7 +17,7 @@ class emailAdder
         private RequestStack $requestStack,
     ){}
 
-    public function addEmail(string $input, $userData, $state): array
+    public function addEmail(string $input, $userData, bool $state): array
     {
         $session = $this->requestStack->getSession();
         $error = null;
@@ -53,6 +53,14 @@ class emailAdder
             {
                 $timeSent = $session->get('timeSent');
                 $now = $this->clock->now();
+
+                if (!$timeSent instanceof \DateTimeInterface) {
+                    return [
+                        'emailSent' => false,
+                        'emailConfirmed' => false,
+                        'error' => 'No active code'
+                    ];
+                }
 
                 if ($timeSent->add(new \DateInterval('PT10M')) <= $now) {
                     $error = 'Expired code';

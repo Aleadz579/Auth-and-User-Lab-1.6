@@ -35,11 +35,12 @@ final class NewPassword
         $hashed = $this->passwordHasher->hashPassword($user, $newPassword);
 
         $user->setPassword($hashed);
+        $Token->setConsumedAt(new \DateTimeImmutable());
 
         $this->em->persist($user);
         $this->em->flush();
 
-        $Token->setConsumedAt(new \DateTimeImmutable());
+
 
         return NewPasswordResult::isChanged(true);
     }
