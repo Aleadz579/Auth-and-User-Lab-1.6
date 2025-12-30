@@ -26,6 +26,18 @@ class emailAdder
         $error = null;
 
         if ($state === true) {
+            $ip = $this->requestStack->getCurrentRequest()?->getClientIp() ?? 'unknown';
+            $failed = $this->authLogRepo->countFailedByIpInLastMinutes('verification_email', $ip, 10);
+            $success = $this->authLogRepo->countSuccessByIpInLastMinutes('verification_email', $ip, 10);
+
+            if ($failed+$success >= 5) {
+                return [
+                    'emailSent' => true,
+                    'emailConfirmed' => false,
+                    'error' => 'Email sent too often',
+                ];
+            }
+
             $code = random_int(100000, 999999);
 
             $email = (new Email())
@@ -44,17 +56,6 @@ class emailAdder
             $session->set('timeSent', $now = $this->clock->now());
 
             $this->logger->log('verification_email', true, $tempEmail, null, $userData);
-
-            $ip = $this->requestStack->getCurrentRequest()?->getClientIp() ?? 'unknown';
-            $failed = $this->authLogRepo->countFailedByIpInLastMinutes('verification_email', $ip, 10);
-
-            if ($failed >= 5) {
-                return [
-                    'emailSent' => true,
-                    'emailConfirmed' => false,
-                    'error' => 'Email sent too often',
-                ];
-            }
 
             return [
                 'emailSent' => true,

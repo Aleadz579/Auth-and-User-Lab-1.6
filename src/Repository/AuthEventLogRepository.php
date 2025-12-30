@@ -33,6 +33,22 @@ class AuthEventLogRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
     }
 
+    public function countSuccessByIpInLastMinutes(string $action, string $ip, int $minutes): int
+    {
+        $since = new \DateTimeImmutable("-{$minutes} minutes");
+
+        return (int) $this->createQueryBuilder('l')
+            ->select('COUNT(l.id)')
+            ->where('l.action = :action')
+            ->andWhere('l.success = true')
+            ->andWhere('l.ip = :ip')
+            ->andWhere('l.createdAt >= :since')
+            ->setParameter('action', $action)
+            ->setParameter('ip', $ip)
+            ->setParameter('since', $since)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
 //    /**
 //     * @return AuthEventLog[] Returns an array of AuthEventLog objects
 //     */

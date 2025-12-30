@@ -39,8 +39,9 @@ final class PasswordReset
 
         $ip = $this->requestStack->getCurrentRequest()?->getClientIp() ?? 'unknown';
         $failed = $this->authLogRepo->countFailedByIpInLastMinutes('password_reset_request', $ip, 10);
+        $success = $this->authLogRepo->countSuccessByIpInLastMinutes('password_reset_request', $ip, 10);
 
-        if ($failed >= 5) {
+        if ($failed+$success >= 5) {
             return PasswordResetResult::isSent(true);
         }
 
