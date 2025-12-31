@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Clock\ClockInterface;
 use Symfony\Component\Mime\Email;
@@ -20,7 +21,7 @@ class EmailAdder
         private AuthEventLogRepository $authLogRepo,
     ){}
 
-    public function addEmail(string $input, $userData, bool $state): array
+    public function addEmail(string $input, User $userData, bool $state): array
     {
         $session = $this->requestStack->getSession();
         $error = null;
@@ -32,7 +33,7 @@ class EmailAdder
 
             if ($failed+$success >= 5) {
                 return [
-                    'emailSent' => true,
+                    'emailSent' => false,
                     'emailConfirmed' => false,
                     'error' => 'Email sent too often',
                 ];

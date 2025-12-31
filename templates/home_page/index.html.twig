@@ -48,7 +48,12 @@
 
         <div id="emailDisplay">
             {% if hasEmail %}
-                <p>Your email is: {{ email }}</p>
+                <form id="emailDeleteForm" method="post">
+                    <p>Your email is: {{ email }}</p>
+                    <input type="hidden" name="delete" value="1">
+                    <button type="submit">Delete</button>
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete_email') }}">
+                </form>
             {% else %}
             <form id="emailForm" method="post">
                 <p>Enter your Email</p>
@@ -74,14 +79,22 @@
     <script>
         const emailForm = document.getElementById('emailForm');
         const codeForm  = document.getElementById('codeForm');
+        const deleteForm = document.getElementById('emailDeleteForm');
+
+        const CSRF_DELETE_EMAIL = "{{ csrf_token('delete_email') }}";
+
+        const byId = (id) => document.getElementById(id);
+        const hide = (id) => { const el = byId(id); if (el) el.style.display = 'none'; };
+        const show = (id) => { const el = byId(id); if (el) el.style.display = 'inline'; };
 
         async function ajaxSubmit(e) {
             e.preventDefault();
             const form = e.currentTarget;
 
-            document.getElementById('wrongCode').style.display = 'none';
-            document.getElementById('emailTaken').style.display = 'none';
-            document.getElementById('tooManyAttempts').style.display = 'none';
+            hide('wrongCode');
+            hide('emailTaken');
+            hide('tooManyAttempts');
+            hide('EmailIsSent');
 
             const res = await fetch(form.action, {
                 method: 'POST',
@@ -92,6 +105,11 @@
 
             const data = await res.json();
 
+            if(data.deleted){
+                location.reload();
+                return;
+            }
+
             if (!data.emailSent) {
                 emailForm.style.display = 'inline';
                 codeForm.style.display = 'none';
@@ -99,10 +117,8 @@
                 codeForm.style.display = 'inline';
                 emailForm.style.display = 'none';
             } else {
-                codeForm.style.display = 'none';
-                emailForm.style.display = 'none';
-                document.getElementById('emailDisplay').innerHTML =
-                    `<p>Your email is: ${data.email}</p>`;
+                location.reload();
+                return;
             }
 
             if (data.error === 'Wrong code') {
@@ -115,8 +131,10 @@
             if (data.emailExists) {
                 document.getElementById('emailTaken').style.display = 'inline';
             }
+            if (data.emailExists) show('emailTaken');
         }
 
+        deleteForm?.addEventListener('submit', ajaxSubmit);
         emailForm?.addEventListener('submit', ajaxSubmit);
         codeForm?.addEventListener('submit', ajaxSubmit);
     </script>

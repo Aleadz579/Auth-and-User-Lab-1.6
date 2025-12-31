@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use PHPUnit\Util\Json;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -10,11 +11,12 @@ use Symfony\Component\Routing\Attribute\Route;
 use App\Repository\UserRepository;
 use App\Service\EmailAdder;
 use App\Service\AuthLogger;
+use Doctrine\ORM\EntityManagerInterface;
 final class HomePageController extends AbstractController
 {
 
     #[Route('/homepage', name: 'app_home_page', methods: ['GET','POST'])]
-    public function index(UserRepository $userRepository, Request $request, EmailAdder $EmailAdder, AuthLogger $logger): Response
+    public function index(UserRepository $userRepository, Request $request, EmailAdder $EmailAdder, AuthLogger $logger, EntityManagerInterface $em): Response
     {
         $hasEmail = false;
         $userData = $this->getUser();
@@ -27,7 +29,19 @@ final class HomePageController extends AbstractController
         if ($request->isXmlHttpRequest() && $request->isMethod('POST')) {
             $email = (string) $request->request->get('email');
             $code = (string) $request->request->get('code');
+            $delete = $request->request->get('delete') === '1';
             $token  = (string) $request->request->get('_token');
+
+            if ($delete) {
+                if (!$this->isCsrfTokenValid('delete_email', $token)) {
+                    $logger->log('csrf_attempt', false);
+                    return $this->json(['error' => 'csrf'], 400);
+                }
+                $userData->setEmail(null);
+                $userData->setEmailVerifiedAt(null);
+                $em->flush();
+                return new JsonResponse(['deleted' => true, 'hasEmail' => false]);
+            }
 
             if ($userData->getEmail() == null || $userData->getEmail() == '') {
                 if($userRepository->findOneBy(['email' => $email]) !== null) {
