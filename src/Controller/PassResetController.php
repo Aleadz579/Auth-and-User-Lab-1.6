@@ -9,15 +9,22 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use App\Service\PasswordReset;
 use App\Service\NewPassword;
+use App\Service\AuthLogger;
 
 
 final class PassResetController extends AbstractController
 {
     #[Route('/login/reset', name: 'password_reset')]
-    public function PassReset(PasswordReset $passwordResetService, Request $request): Response
+    public function PassReset(PasswordReset $passwordResetService, Request $request,AuthLogger $logger): Response
     {
         if ($request->isMethod('POST')) {
             $email = $request->request->get('email');
+            $csrftoken  = (string) $request->request->get('_token');
+
+            if (!$this->isCsrfTokenValid('reset_email', $csrftoken)) {
+                $logger->log('csrf_attempt', false);
+                return $this->json(['error' => 'csrf'], 400);
+            }
 
             $result = $passwordResetService->resetPassword($email);
 
@@ -32,6 +39,7 @@ final class PassResetController extends AbstractController
     #[Route('/login/newpass/{token<[a-f0-9]{32}\.[a-f0-9]{64}>}', name: 'new_password')]
     public function NewPassword(string $token, Request $request, NewPassword $newPasswordService): Response
     {
+
         if ($request->isXmlHttpRequest() && $request->isMethod('POST')) {
             if($request->request->get('Pass1') === $request->request->get('Pass2'))
             {

@@ -27,6 +27,14 @@ final class PasswordReset
     {
         $userData = $this->users->findOneBy(['email' => $email]);
 
+        $ip = $this->requestStack->getCurrentRequest()?->getClientIp() ?? 'unknown';
+        $failed = $this->authLogRepo->countFailedByIpInLastMinutes('password_reset_request', $ip, 10);
+        $success = $this->authLogRepo->countSuccessByIpInLastMinutes('password_reset_request', $ip, 10);
+
+        if ($failed+$success >= 5) {
+            return PasswordResetResult::isSent(true);
+        }
+
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $this->logger->log('password_reset_request', false, $email, 'invalid_email_format');
             return PasswordResetResult::isSent(true);
@@ -34,14 +42,6 @@ final class PasswordReset
 
         if(!$userData) {
             $this->logger->log('password_reset_request', false, $email, 'email_not_found');
-            return PasswordResetResult::isSent(true);
-        }
-
-        $ip = $this->requestStack->getCurrentRequest()?->getClientIp() ?? 'unknown';
-        $failed = $this->authLogRepo->countFailedByIpInLastMinutes('password_reset_request', $ip, 10);
-        $success = $this->authLogRepo->countSuccessByIpInLastMinutes('password_reset_request', $ip, 10);
-
-        if ($failed+$success >= 5) {
             return PasswordResetResult::isSent(true);
         }
 

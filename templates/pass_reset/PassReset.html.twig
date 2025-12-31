@@ -55,6 +55,7 @@
 
                     <div class="actions">
                         <button id="sendResetBtn" class="btn btn--primary" type="submit">Send reset link</button>
+                        <input type="hidden" name="_token" value="{{ csrf_token('reset_email') }}">
                         <a class="link muted" href="/login">Back to login</a>
                     </div>
                     <span id="countdown"  style="color: darkgrey"></span>

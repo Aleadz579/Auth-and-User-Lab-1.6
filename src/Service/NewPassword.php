@@ -22,7 +22,7 @@ final class NewPassword
         [$TokenCheck, $Token] = $this->check->tokenCheck($URLToken);
 
         if (!$TokenCheck) {
-            $this->logger->log('passChange_attempt', false, null, 'invalid_token', null);
+            $this->logger->log('passChange_attempt', false, null, 'invalid_token');
             return NewPasswordResult::isChanged(false, 'Invalid token.');
         }
 
@@ -41,7 +41,7 @@ final class NewPassword
         $this->em->persist($user);
         $this->em->flush();
 
-        $this->logger->log('passChange_attempt', true, $user->getUsername(), null, $user->getUser());
+        $this->logger->log('passChange_attempt', true, $user->getUsername(), null, $user);
 
         return NewPasswordResult::isChanged(true);
     }
