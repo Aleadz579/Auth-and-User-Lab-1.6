@@ -9,7 +9,7 @@ use App\Repository\AuthEventLogRepository;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 
-class emailAdder
+class EmailAdder
 {
     public function __construct(
         private AuthLogger $logger,

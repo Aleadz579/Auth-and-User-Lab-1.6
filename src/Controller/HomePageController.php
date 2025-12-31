@@ -8,13 +8,13 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 use App\Repository\UserRepository;
-use App\Service\emailAdder;
+use App\Service\EmailAdder;
 use App\Service\AuthLogger;
 final class HomePageController extends AbstractController
 {
 
     #[Route('/homepage', name: 'app_home_page', methods: ['GET','POST'])]
-    public function index(UserRepository $userRepository, Request $request, emailAdder $emailAdder, AuthLogger $logger): Response
+    public function index(UserRepository $userRepository, Request $request, EmailAdder $EmailAdder, AuthLogger $logger): Response
     {
         $hasEmail = false;
         $userData = $this->getUser();
@@ -40,7 +40,7 @@ final class HomePageController extends AbstractController
                             return $this->json(['error' => 'csrf'], 400);
                         }
 
-                        $emailAdded = $emailAdder->addEmail($email, $userData,true);
+                        $emailAdded = $EmailAdder->addEmail($email, $userData,true);
 
                         return new JsonResponse($emailAdded);
                     }else if ($code) {
@@ -49,7 +49,7 @@ final class HomePageController extends AbstractController
                             return $this->json(['error' => 'csrf'], 400);
                         }
 
-                        $emailAdded = $emailAdder->addEmail($code, $userData,false);
+                        $emailAdded = $EmailAdder->addEmail($code, $userData,false);
 
                         return new JsonResponse($emailAdded);
                     }
