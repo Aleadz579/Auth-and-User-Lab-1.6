@@ -37,10 +37,17 @@ final class PassResetController extends AbstractController
     }
 
     #[Route('/login/newpass/{token<[a-f0-9]{32}\.[a-f0-9]{64}>}', name: 'new_password')]
-    public function NewPassword(string $token, Request $request, NewPassword $newPasswordService): Response
+    public function NewPassword(string $token, Request $request, NewPassword $newPasswordService, AuthLogger $logger): Response
     {
 
         if ($request->isXmlHttpRequest() && $request->isMethod('POST')) {
+            $csrftoken  = (string) $request->request->get('_token');
+
+            if (!$this->isCsrfTokenValid('new_password', $csrftoken)) {
+                $logger->log('csrf_attempt', false);
+                return $this->json(['error' => 'csrf'], 400);
+            }
+
             if($request->request->get('Pass1') === $request->request->get('Pass2'))
             {
                 $newPassword = $request->request->get('Pass1');

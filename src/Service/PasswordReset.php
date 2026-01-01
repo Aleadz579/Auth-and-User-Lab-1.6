@@ -52,7 +52,7 @@ final class PasswordReset
         $RequestedAt = new \DateTimeImmutable();
         $ExpiresAt = $RequestedAt->add(new \DateInterval('PT1H'));
 
-        $token = new PasswordResetToken()
+        $token = (new PasswordResetToken())
             ->setUser($userData)
             ->setSelector($selector)
             ->setHashedVerifier($hashedVerifier)
