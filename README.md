@@ -1,4 +1,4 @@
-# Auth & User Lab
+# Auth & User Lab 1/6
 
 This is my Symfony security lab project.  
 Goal: Build secure authentication features.
