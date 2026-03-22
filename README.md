@@ -10,11 +10,9 @@ It’s for learning + proving I actually understand:
 - email verification
 - audit logging
 
-No fancy frontend.
-
 ---
 
-## What it can do (right now)
+## What it can do
 
 - Register + login (Symfony Security)
 - Password reset flow (token link + expiry)
